@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+	<div class="comic-container">
+		<h1 class="page-title">{{ page.title }}</h1>
+		<img class="page-image" src="{{ image_path }}">
+		{% if page.pre_dialog_text %}
+		<p class="comic-text">
+		{{ page.pre_dialog_text }}
+		</p>
+		{% endif %}
+		{% if page.dialoglog %}
+		<div class="dialog-log">
+			<button type="button" class="dialog-log-button">Dialoglog</button>
+			{% for character in page.dialoglog %}
+			{% for entry in character.logs %}
+			<p style="color: {{ name_to_color(character.char) }};">{{character.char}}: {{entry}}</p>
+			{% endfor %}
+			{% endfor %}
+		</div>
+		{% endif %}
+		{% if page.post_dialog_text %}
+		<p class="comic-text">
+		{{ page.post_dialog_text }}
+		</p>
+		{% endif %}
+		<div class="comic-next">
+		> <a href="{% url "generate" %}">Generate another</a>
+		</div>
+		<hr>
+		<div class="comic-text">
+		{% if not voted %}<a href="{% url "vote" page.char_id %}">Vote</a>{% else %}<b>Voted!</b>{% endif %} (Score {{ page.score }})
+		{% if not page.score %}
+		<p style="color: red;">Pages with a score of 0 will be deleted after 24 hours. If you want to save this page, vote at least once!</p>
+		{% endif %}
+		</div>
+	</div>
+</div>
+{% endblock %}

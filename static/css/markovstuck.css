@@ -1,0 +1,160 @@
+body {
+	background-color: #5A5A5A;
+}
+
+.site-title {
+	font-weight: bold;
+	font-family: courier, monospace;
+	width: 100%;
+	text-align: center;
+	
+	color: green;
+	
+	margin-top: 0px;
+	margin-bottom: 0px;
+	padding-bottom: 10px;
+}
+
+.site-title > a {
+	text-decoration: none;
+	color: green;
+}
+
+.container {
+	padding-top: 5px;
+	padding-bottom: 25px;
+	margin: 0 auto;
+	
+	background-color: #C6C6C6;
+	width: 950px;
+}
+
+.comic-container {
+	padding-top: 5px;
+	padding-bottom: 10px;
+	
+	background-color: #EEEEEE;
+	margin: 0 auto;
+	width: min-content;
+}
+
+.page-title {
+	font-weight: bold;
+	font-family: courier, monospace;
+	color: black;
+	font-size: xx-large;
+	text-align: center;
+}
+
+.page-image {
+	margin: auto;
+	display: block;
+	padding-bottom: 25px;
+}
+
+.comic-text {
+	padding-top: 15px;
+	font-weight: bold;
+	font-family: courier, monospace;
+	color: black;
+	font-size: 14px;
+	text-align: center;
+	margin: auto;
+	width: 600px;
+}
+
+.dialog-log {
+	border: 1px dashed gray;
+	padding: 1px;
+	
+	margin: auto;
+	margin-top: 20px;
+	width: 600px;
+	padding-bottom: 20px;
+}
+
+.dialog-log-button {
+	display: block;
+	
+	margin: auto;
+	margin-bottom: 15px;
+}
+
+.dialog-log > p {
+	font-weight: bold;
+	font-family: courier, monospace;
+	color: black;
+	font-size: 14px;
+	text-align: left;
+	margin: auto;
+	width: 536px;
+}
+
+.comic-next {
+	padding-top: 30px;
+	padding-bottom: 25px;
+	
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: x-large;
+	
+	width: 600px;
+	margin: auto;
+	text-align: left;
+}
+
+.leaderboard-table {
+	display: inline-block;
+	width: 47%;
+	border: 1px gray dashed;
+	margin-bottom: 25px;
+}
+
+.leaderboard-table > table {
+	width: 100%;
+}
+
+.leaderboard-table > td {
+	font-size: 10px;
+	text-align: left;
+}
+
+.loaderboard-table > td > a {
+	text-decoration: none;
+}
+
+.frontpage-text {
+	padding-top: 15px;
+	font-weight: bold;
+	font-family: courier, monospace;
+	color: black;
+	font-size: 14px;
+	text-align: center;
+	margin: auto;
+	width: 800px;
+}
+
+.footer {
+	padding-top: 10px;
+	text-align: center;
+	width: 800px;
+	margin: auto;
+}
+
+.ad-spot {
+	width: 728px;
+	margin: auto;
+}
+
+.entry-table {
+	font-weight: bold;
+	font-family: courier, monospace;
+	width: 80%;
+	border: 1px gray dashed;
+	margin: auto;
+	margin-bottom: 25px;
+}
+
+.pagination {
+	font-size: 32px;
+	text-align: center;
+}
