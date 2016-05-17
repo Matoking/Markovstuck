@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+	<div class="frontpage-text">
+		<h1>Top entries</h1>
+		<h3>Page {{ current_page }} of {{ total_pages }}</h3>
+	</div>
+	{% if total_entry_count > 0 %}
+	<table class="entry-table">
+		<thead>
+			<tr>
+				<th>Title</th>
+				<th>Score</th>
+			</tr>
+		</thead>
+		<tbody>
+
+			{% for entry in entries %}
+			<tr>
+				<td><a href="{% url "view_page" entry.char_id %}">{{ entry.title|truncate(128) }}</a></td>
+				<td>{{ entry.score }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	{% endif %}
+	{% with destination="top_entries" %}{% include "pagination.html" %}{% endwith %}
+</div>
+{% endblock %}

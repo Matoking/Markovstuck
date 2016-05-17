@@ -61,6 +61,39 @@ def latest_entries(request, page=1):
                                                                   "total_pages": total_pages,
                                                                   "total_entry_count": total_entry_count})
 
+def top_entries(request, page=1):
+    ENTRIES_PER_PAGE = 20
+
+    page = int(page)
+
+    total_entry_count = cache.get("total_entry_count")
+
+    if total_entry_count is None:
+        total_entry_count = Page.objects.filter(saved=True).count()
+        cache.set("total_entry_count", total_entry_count)
+
+    total_pages = math.ceil(float(total_entry_count) / float(ENTRIES_PER_PAGE))
+    if page > total_pages:
+        page = max(int(total_pages), 1)
+
+    offset = (page - 1) * ENTRIES_PER_PAGE
+    entries = cache.get("top_entries:%s" % page)
+
+    if entries is None:
+        entries = Page.objects.filter(saved=True).order_by(
+            "-score")[offset:(page * ENTRIES_PER_PAGE)]
+        cache.set("top_entries:%s" % page, entries, 15)
+
+    pages = Paginator.get_pages(page, ENTRIES_PER_PAGE, total_entry_count)
+    total_pages = int(
+        math.ceil(float(total_entry_count) / float(ENTRIES_PER_PAGE)))
+
+    return render(request, "top_entries/top_entries.html", {"current_page": page,
+                                                            "entries": entries,
+                                                            "pages": pages,
+                                                            "total_pages": total_pages,
+                                                            "total_entry_count": total_entry_count})
+
 
 def generate(request):
     page = Page()

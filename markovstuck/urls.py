@@ -20,12 +20,15 @@ from markovstuck import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    
+
     url(r'^latest_entries/(?P<page>\d+)/$', views.latest_entries, name="latest_entries"),
     url(r'^latest_entries/$', views.latest_entries, name="latest_entries"),
-    
+
+    url(r'^top_entries/(?P<page>\d+)/$', views.top_entries, name="top_entries"),
+    url(r'^top_entries/$', views.top_entries, name="top_entries"),
+
     url(r'^generate/', views.generate, name="generate"),
-    
+
     url(r'^(?P<char_id>\w{8})/vote', views.vote, name="vote"),
     url(r'^(?P<char_id>\w{8})/$', views.view_page, name="view_page"),
     url(r'^$', views.home, name="home"),
