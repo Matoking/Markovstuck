@@ -79,3 +79,6 @@ local_settings.py
 [Ss]cripts
 pyvenv.cfg
 pip-selfcheck.json
+
+# Ignore Markov chain files
+chains/

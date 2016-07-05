@@ -8,10 +8,13 @@ from markovify.text import NewlineText
 from markovify.chain import Chain
 
 from generator import settings
+from generator.utils import save_chain
 
 from django_redis import get_redis_connection
 
 import random
+
+import datetime
 
 import cPickle
 
@@ -136,6 +139,13 @@ class CharacterText(models.Model):
         # Generate the chain here
         super(CharacterText, self).save(*args, **kwargs)
 
+    def generate_chain_file(self):
+        """Generate a Markov chain file that can be loaded later"""
+        self.markov = NewlineText(self.text)
+
+        data = self.markov.chain.to_json()
+        save_chain(self.character, data)
+
     def generate_sentence(self):
         if self.markov is None:
             result = cache.get("character_text_pickle:%s" % self.character)
@@ -170,6 +180,14 @@ class TitleText(models.Model):
         # Generate the chain here
         super(TitleText, self).save(*args, **kwargs)
 
+
+    def generate_chain_file(self):
+        """Generate a Markov chain file that can be loaded later"""
+        self.markov = NewlineText(self.text)
+
+        data = self.markov.chain.to_json()
+        save_chain("title", data)
+
     def generate_sentence(self):
         if self.markov is None:
             result = cache.get("title_text_pickle")
@@ -202,6 +220,13 @@ class GeneralText(models.Model):
     def save(self, *args, **kwargs):
         # Generate the chain here
         super(GeneralText, self).save(*args, **kwargs)
+
+    def generate_chain_file(self):
+        """Generate a Markov chain file that can be loaded later"""
+        self.markov = NewlineText(self.text)
+
+        data = self.markov.chain.to_json()
+        save_chain("general", data)
 
     def generate_sentence(self):
         if self.markov is None:

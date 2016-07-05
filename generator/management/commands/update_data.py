@@ -62,12 +62,13 @@ class Command(BaseCommand):
                 continue
 
             # Check if it starts a pesterlog
-            if line == "|PESTERLOG|":
+            if line.strip() in ["|PESTERLOG|", "|DIALOGLOG|"]:
                 continue
 
             # Check if it contains a title
             match = re.search("\ ([0-9]{2})\/([0-9]{2})\/([0-9]{2})", line)
-            if match != None:
+
+            if match is not None:
                 # It's a title
                 self.titles.append(line[13:len(line)-1])
                 continue
@@ -118,6 +119,7 @@ class Command(BaseCommand):
         # Save all the models
         title_text = TitleText(text="\n".join(self.titles))
         title_text.save()
+        title_text.generate_chain_file()
 
         character_id = 1
 
@@ -130,7 +132,9 @@ class Command(BaseCommand):
                                            character=character,
                                            text="\n".join(self.dialog[character]))
             character_text.save()
+            character_text.generate_chain_file()
             character_id += 1
 
         general_text = GeneralText(text="\n".join(self.text))
         general_text.save()
+        general_text.generate_chain_file()

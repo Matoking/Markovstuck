@@ -1,4 +1,4 @@
-from markovstuck import settings
+import os.path
 
 # Fetch data from these URLs
 URLS = [
@@ -194,5 +194,7 @@ NAME_COLORS = {
 IMAGE_START = 1
 IMAGE_END = 7932
 
+STATIC_ROOT = '%s/static' % os.path.realpath("%s/../../" % __file__),
+
 # Where to save the loaded images
-IMAGE_PATH = "%s/img/hs2" % settings.STATICFILES_DIRS[0]
+IMAGE_PATH = "%s/img/hs2" % STATIC_ROOT

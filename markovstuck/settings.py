@@ -24,7 +24,12 @@ SECRET_KEY = 'REPLACE_THIS_WITH_SOMETHING_COMPLETELY_RANDOM_EG_TRY_SLAMMING_YOUR
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [".markovstuck.matoking.com"]
+ALLOWED_HOSTS = [".markovstuck.matoking.com",
+    "192.168.1.42"]
+
+INTERNAL_IPS = [
+    "192.168.1.42",
+    "192.168.1.3"]
 
 
 # Application definition
@@ -36,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'debug_toolbar',
 
     'markovstuck',
     'generator',

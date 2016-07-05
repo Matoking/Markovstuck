@@ -14,6 +14,8 @@ import random
 import json
 import string
 import math
+import datetime
+import requests
 
 
 def home(request):
@@ -61,6 +63,39 @@ def latest_entries(request, page=1):
                                                                   "total_pages": total_pages,
                                                                   "total_entry_count": total_entry_count})
 
+def top_entries(request, page=1):
+    ENTRIES_PER_PAGE = 20
+
+    page = int(page)
+
+    total_entry_count = cache.get("total_entry_count")
+
+    if total_entry_count is None:
+        total_entry_count = Page.objects.filter(saved=True).count()
+        cache.set("total_entry_count", total_entry_count)
+
+    total_pages = math.ceil(float(total_entry_count) / float(ENTRIES_PER_PAGE))
+    if page > total_pages:
+        page = max(int(total_pages), 1)
+
+    offset = (page - 1) * ENTRIES_PER_PAGE
+    entries = cache.get("top_entries:%s" % page)
+
+    if entries is None:
+        entries = Page.objects.filter(saved=True).order_by(
+            "-score")[offset:(page * ENTRIES_PER_PAGE)]
+        cache.set("top_entries:%s" % page, entries, 15)
+
+    pages = Paginator.get_pages(page, ENTRIES_PER_PAGE, total_entry_count)
+    total_pages = int(
+        math.ceil(float(total_entry_count) / float(ENTRIES_PER_PAGE)))
+
+    return render(request, "top_entries/top_entries.html", {"current_page": page,
+                                                            "entries": entries,
+                                                            "pages": pages,
+                                                            "total_pages": total_pages,
+                                                            "total_entry_count": total_entry_count})
+
 
 def generate(request):
     page = Page()
@@ -72,33 +107,25 @@ def generate(request):
         title_text = TitleText.objects.all()[0]
         cache.set("title_text", title_text)
 
-    page.title = title_text.generate_sentence()
-
     # Get image
     page.image = ComicImage.get_random_image()
 
-    general_text = cache.get("general_text")
-
-    if general_text is None:
-        general_text = GeneralText.objects.all()[0]
-        cache.set("general_text", general_text)
+    json_request = {}
 
     if random.randint(1, 10) >= 7:
         # Generate pre dialog text
-        page.pre_dialog_text = general_text.generate_sentence()
+        json_request["generate_pre_dialog"] = True
 
-    dialoglog = []
+    json_request["characters"] = []
 
     if random.randint(1, 10) >= 5:
         # Generate dialoglog
 
         # How many characters will there be in the conversation
         characters_in_conv = random.randint(1, 3)
-        conversation_length = random.randint(1, 4)
+        json_request["conversation_length"] = random.randint(1, 4)
 
         character_count = CharacterText.objects.count()
-
-        characters = []
 
         for i in range(0, characters_in_conv):
             random_char_id = random.randint(1, character_count)
@@ -106,31 +133,35 @@ def generate(request):
             character = cache.get("character:%d" % random_char_id)
 
             if character is None:
-                character = CharacterText.objects.get(
+                character = CharacterText.objects.only(
+                    "character_id", "character").get(
                     character_id=random_char_id)
                 cache.set("character:%d" % random_char_id, character)
 
-            characters.append(character)
+            json_request["characters"].append(character.character)
 
-        for i in range(0, conversation_length):
-            # Pick a random character
-            character = characters[random.randint(0, characters_in_conv - 1)]
-
-            entry = {"char": character.character,
-                     "logs": []}
-
-            for j in range(0, random.randint(1, 3)):
-                entry["logs"].append(character.generate_sentence())
-            dialoglog.append(entry)
-
-        page.dialoglog = json.dumps(dialoglog)
+    json_request["characters"] = json.dumps(json_request["characters"])
 
     if random.randint(1, 10) >= 6:
         # Generate post dialog text
-        page.post_dialog_text = general_text.generate_sentence()
+        json_request["generate_post_dialog"] = True
+
+    response = requests.post("http://127.0.0.1:5666/", data=json_request)
+    response = json.loads(response.text)
 
     page.char_id = ''.join(random.SystemRandom().choice(
         string.uppercase + string.lowercase + string.digits) for _ in xrange(8))
+
+    page.title = response["title"]
+
+    if "dialoglog" in response:
+        page.dialoglog = json.dumps(response["dialoglog"])
+
+    if "pre_dialog_text" in response:
+        page.pre_dialog_text = response["pre_dialog_text"]
+
+    if "post_dialog_text" in response:
+        page.post_dialog_text = response["post_dialog_text"]
 
     # This is really unlikely (unless there's a problem with generating random numbers),
     # but check if the char ID already exists
