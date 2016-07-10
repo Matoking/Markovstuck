@@ -82,3 +82,6 @@ pip-selfcheck.json
 
 # Ignore Markov chain files
 chains/
+
+# Ignore Homestuck image files
+staic/img/hs2/

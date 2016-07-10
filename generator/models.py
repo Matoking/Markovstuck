@@ -147,6 +147,10 @@ class CharacterText(models.Model):
         save_chain(self.character, data)
 
     def generate_sentence(self):
+        """
+        DEPRECATED
+        Generate a sentence by loading Markov chain into memory
+        """
         if self.markov is None:
             result = cache.get("character_text_pickle:%s" % self.character)
 
@@ -189,6 +193,10 @@ class TitleText(models.Model):
         save_chain("title", data)
 
     def generate_sentence(self):
+        """
+        DEPRECATED
+        Generate a sentence by loading Markov chain into memory
+        """
         if self.markov is None:
             result = cache.get("title_text_pickle")
 
@@ -229,6 +237,10 @@ class GeneralText(models.Model):
         save_chain("general", data)
 
     def generate_sentence(self):
+        """
+        DEPRECATED
+        Generate a sentence by loading Markov chain into memory
+        """
         if self.markov is None:
             result = cache.get("general_text_pickle")
 

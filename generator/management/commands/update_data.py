@@ -62,7 +62,7 @@ class Command(BaseCommand):
                 continue
 
             # Check if it starts a pesterlog
-            if line.strip() in ["|PESTERLOG|", "|DIALOGLOG|"]:
+            if line.strip() in settings.IGNORE_LINES:
                 continue
 
             # Check if it contains a title

@@ -189,6 +189,12 @@ NAME_COLORS = {
     "uu": "#323232",
 }
 
+# Ignore any lines which contain any of the following strings
+IGNORE_LINES = [
+    "|PESTERLOG|", "|DIALOGLOG|", "|SPRITELOG|", "|TRKSTRLOG|", "|SRIOUSBIZ|",
+    "|JOURNALOG|", "|AUTHORLOG|"
+]
+
 # The images are downloaded from the URL http://cdn.mspaintadventures.com/storyfiles/hs2/XXXXX.gif
 # starting from IMAGE_START to IMAGE_END
 IMAGE_START = 1

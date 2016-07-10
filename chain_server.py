@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from markovify.text import NewlineText
 
 import tornado.ioloop
@@ -8,6 +10,10 @@ import os.path
 
 import json
 import random
+import sys
+import resource
+
+import humanfriendly
 
 
 class MarkovChain(object):
@@ -16,18 +22,19 @@ class MarkovChain(object):
 
     def load_chains(self):
         """Load Markov chains from files"""
-        import settings
+        from generator import settings
 
         chains = settings.NAMES + ["general", "title"]
 
         for name in chains:
             path = os.path.join(
-                "..",
                 "chains",
                 "%s.json" % name)
 
             if not os.path.exists(path):
                 continue
+
+            print("Loading chain %s... " % name, end="")
 
             f = open(path, 'r')
             data = f.read()
@@ -37,6 +44,8 @@ class MarkovChain(object):
             text = NewlineText.from_chain(data)
 
             self.chains[name] = text
+
+            print("Loaded!")
 
 
 markov_chain = MarkovChain()
@@ -99,16 +108,22 @@ class MainHandler(tornado.web.RequestHandler):
 
         return None
 
+
 def main():
     parse_command_line()
     print("Loading markov chains...")
     markov_chain.load_chains()
-    print("Loaded markov chains.")
+
+    # Print memory usage for the server when all chains are loaded
+    memory_usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1000.0
+    memory_usage = humanfriendly.format_size(memory_usage)
+
+    print("Markov chain server loaded, memory usage %s" % memory_usage)
 
     application = tornado.web.Application([
         (r"/", MainHandler),
     ], debug=False)
-    application.listen(5666)
+    application.listen(5666, address='127.0.0.1')
     tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":
