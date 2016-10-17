@@ -24,7 +24,8 @@ def home(request):
     last_week_leaderboards = Leaderboards.get_last_week()
     last_day_leaderboards = Leaderboards.get_last_day()
 
-    return render(request, "home/home.html",
+    return render(
+        request, "home/home.html",
         {"alltime_leaderboards": alltime_leaderboards,
          "last_month_leaderboards": last_month_leaderboards,
          "last_week_leaderboards": last_week_leaderboards,
@@ -58,7 +59,8 @@ def latest_entries(request, page=1):
     total_pages = int(
         math.ceil(float(total_entry_count) / float(ENTRIES_PER_PAGE)))
 
-    return render(request, "latest_entries/latest_entries.html",
+    return render(
+        request, "latest_entries/latest_entries.html",
         {"current_page": page,
          "entries": entries,
          "pages": pages,
@@ -93,12 +95,13 @@ def top_entries(request, page=1):
     total_pages = int(
         math.ceil(float(total_entry_count) / float(ENTRIES_PER_PAGE)))
 
-    return render(request, "top_entries/top_entries.html", {
-        "current_page": page,
-        "entries": entries,
-        "pages": pages,
-        "total_pages": total_pages,
-        "total_entry_count": total_entry_count})
+    return render(
+        request, "top_entries/top_entries.html", {
+            "current_page": page,
+            "entries": entries,
+            "pages": pages,
+            "total_pages": total_pages,
+            "total_entry_count": total_entry_count})
 
 
 def generate(request):
@@ -232,7 +235,8 @@ def view_page(request, char_id):
     ip = get_real_ip(request)
     voted = True if con.get("voted:%s:%s" % (ip, char_id)) else False
 
-    return render(request, "view_page/view_page.html",
+    return render(
+        request, "view_page/view_page.html",
         {"page": page,
          "image_path": image_path,
          "voted": voted})

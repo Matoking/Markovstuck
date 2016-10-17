@@ -19,7 +19,7 @@ python manage.py update_data
 python manage.py update_images
 ```
 
-To ensure that pages can be generated fast, you need to run the provided chain_server.py script, which loads every existing Markov chain into memory at once. At the time of writing, the server consumes about ~500 MB of RAM once loaded.
+To ensure that pages can be generated fast, you need to run the provided chain_server.py script, which loads every existing Markov chain into memory at once. At the time of writing, the server consumes about ~500 MB of RAM on a 32-bit system or ~1 GB on a 64-bit system once loaded.
 
 ```
 python chain_server.py

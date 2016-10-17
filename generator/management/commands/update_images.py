@@ -39,6 +39,10 @@ class Command(BaseCommand):
         # Get the current list if it exists
         images = con.smembers("panel_images")
 
+        # Create the directory for images if it doesn't exist
+        if not os.path.isdir(settings.IMAGE_PATH):
+            os.makedirs(settings.IMAGE_PATH)
+
         if len(images) > 0:
             # If the last update attempt was unfinished, start from
             # where we left off
