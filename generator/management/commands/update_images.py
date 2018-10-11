@@ -1,20 +1,12 @@
-from django.core.management.base import BaseCommand
-
-import requests
-import re
 import os
+from urllib.error import HTTPError
+
 import wget
-
-from sets import Set
-
 from bs4 import BeautifulSoup
-
-from generator import settings
-from generator.models import CharacterText, TitleText, GeneralText
-
-from generator import settings
-
+from django.core.management.base import BaseCommand
 from django_redis import get_redis_connection
+from generator import settings
+from generator.models import CharacterText, GeneralText
 
 
 class Command(BaseCommand):
@@ -62,17 +54,18 @@ class Command(BaseCommand):
                 image_file_no = "0%s" % image_file_no
 
             image_path = "%s/%s.gif" % (settings.IMAGE_PATH, image_file_no)
-            wget.download("http://cdn.mspaintadventures.com/storyfiles/hs2/%s.gif" % image_file_no,
-                          image_path)
 
-            size = os.path.getsize(image_path)
+            try:
+                wget.download("https://www.homestuck.com/images/storyfiles/hs2/%s.gif" % image_file_no,
+                              image_path)
+            except HTTPError as exc:
+                if exc.code == 404:
+                    print("Image #%d doesn't exist, skipped" % i)
+                    continue
+                else:
+                    raise
 
-            if size > 70:
-                con.sadd("panel_images", i)
-                print("\nImage #%d added" % i)
-            else:
-                os.remove(image_path)
-                print("\nImage #%d doesn't exist, skipped" % i)
-                continue
+            con.sadd("panel_images", i)
+            print("\nImage #%d added" % i)
 
         print("Done!")

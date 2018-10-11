@@ -3,8 +3,6 @@ from django.core.management.base import BaseCommand
 import requests
 import re
 
-from sets import Set
-
 from bs4 import BeautifulSoup
 
 from generator import settings
@@ -24,11 +22,21 @@ class Command(BaseCommand):
 
     aliases = {}
 
-    names = Set()
+    names = set()
 
     def handle(self, *args, **options):
-        print("Loading pages")
+        print(
+            "Homestuck has migrated to a new site and the search page used to "
+            "populate the Markov chains no longer exists.\n"
+            "However, complete copies of the Markov chains have been provided "
+            "in the 'chains' directory, meaning you don't need to use this "
+            "command."
+        )
 
+        return None
+
+        # Rest of the code is for posterity, or if someone wants to reimplement
+        # things to work with the new site.
         self.create_aliases()
 
         for url in settings.URLS:
@@ -128,9 +136,11 @@ class Command(BaseCommand):
             if len(text) < 200:
                 continue
 
-            character_text = CharacterText(character_id=character_id,
-                                           character=character,
-                                           text="\n".join(self.dialog[character]))
+            character_text = CharacterText(
+                character_id=character_id,
+                character=character,
+                text="\n".join(self.dialog[character])
+            )
             character_text.save()
             character_text.generate_chain_file()
             character_id += 1

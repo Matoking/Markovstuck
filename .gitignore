@@ -80,8 +80,5 @@ local_settings.py
 pyvenv.cfg
 pip-selfcheck.json
 
-# Ignore Markov chain files
-chains/
-
 # Ignore Homestuck image files
 static/img/hs2/

@@ -12,12 +12,13 @@ pip install -r requirements.txt
 
 In addition to usual requirements for a Django application, Markovstuck also requires a Redis server acting as a persistent storage (check the 'persistent' cache in settings.py).
 
-Before any pages can be generated, you'll need to run two commands to download and parse data from MSPAdventures.com the web application uses to create its Markov models:
+Before any pages can be generated, you'll need to run a command to download images from MSPAdventures.com the web application uses to populate the generated pages:
 
 ```
-python manage.py update_data
 python manage.py update_images
 ```
+
+Pre-generated Markov chains are included in the `chains` directory. `update_data` command was used to create the Markov chains on demand, but since Homestuck's migration to a new site, the search page used for this was removed.
 
 To ensure that pages can be generated fast, you need to run the provided chain_server.py script, which loads every existing Markov chain into memory at once. At the time of writing, the server consumes about ~500 MB of RAM on a 32-bit system or ~1 GB on a 64-bit system once loaded.
 

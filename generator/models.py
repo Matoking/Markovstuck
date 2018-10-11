@@ -16,7 +16,7 @@ import random
 
 import datetime
 
-import cPickle
+import pickle
 
 
 class Leaderboards(object):
@@ -155,11 +155,11 @@ class CharacterText(models.Model):
             result = cache.get("character_text_pickle:%s" % self.character)
 
             if result is not None:
-                self.markov = cPickle.loads(result)
+                self.markov = pickle.loads(result)
             else:
                 self.markov = NewlineText(self.text)
                 cache.set("character_text_pickle:%s" %
-                          self.character, cPickle.dumps(self.markov))
+                          self.character, pickle.dumps(self.markov))
 
         # Try at most 10 times to generate a sentence
         for i in range(0, 10):
@@ -201,10 +201,10 @@ class TitleText(models.Model):
             result = cache.get("title_text_pickle")
 
             if result is not None:
-                self.markov = cPickle.loads(result)
+                self.markov = pickle.loads(result)
             else:
                 self.markov = NewlineText(self.text)
-                cache.set("title_text_pickle", cPickle.dumps(self.markov))
+                cache.set("title_text_pickle", pickle.dumps(self.markov))
 
         # Try at most 10 times to generate a sentence
         for i in range(0, 10):
@@ -245,10 +245,10 @@ class GeneralText(models.Model):
             result = cache.get("general_text_pickle")
 
             if result is not None:
-                self.markov = cPickle.loads(result)
+                self.markov = pickle.loads(result)
             else:
                 self.markov = NewlineText(self.text)
-                cache.set("general_text_pickle", cPickle.dumps(self.markov))
+                cache.set("general_text_pickle", pickle.dumps(self.markov))
 
         # Try at most 10 times to generate a sentence
         for i in range(0, 10):

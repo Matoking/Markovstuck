@@ -2,7 +2,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from django.core.cache import cache
 
-from generator.models import Leaderboards, ComicImage, Page, CharacterText, TitleText, GeneralText
+from generator.models import (
+    Leaderboards, ComicImage, Page, CharacterText, TitleText, GeneralText
+)
 
 from markovstuck.util import Paginator
 
@@ -157,7 +159,8 @@ def generate(request):
     response = json.loads(response.text)
 
     page.char_id = ''.join(random.SystemRandom().choice(
-        string.uppercase + string.lowercase + string.digits) for _ in xrange(8))
+        string.ascii_letters + string.digits) for _ in range(8)
+    )
 
     page.title = response["title"]
 

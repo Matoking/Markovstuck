@@ -24,12 +24,16 @@ SECRET_KEY = 'REPLACE_THIS_WITH_SOMETHING_COMPLETELY_RANDOM_EG_TRY_SLAMMING_YOUR
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [".markovstuck.matoking.com",
-    "192.168.1.42"]
+ALLOWED_HOSTS = [
+    ".markovstuck.matoking.com",
+    "192.168.1.42",
+    "192.168.1.160"
+]
 
 INTERNAL_IPS = [
     "192.168.1.42",
-    "192.168.1.3"]
+    "192.168.1.3"
+]
 
 
 # Application definition
@@ -47,13 +51,14 @@ INSTALLED_APPS = [
     'generator',
 ]
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]

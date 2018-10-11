@@ -13,23 +13,26 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url, include
+from django.urls import path, include
 from django.contrib import admin
 
 from markovstuck import views
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
 
-    url(r'^latest_entries/(?P<page>\d+)/$', views.latest_entries, name="latest_entries"),
-    url(r'^latest_entries/$', views.latest_entries, name="latest_entries"),
+    path(
+        'latest_entries/<int:page>/',
+        views.latest_entries, name="latest_entries"
+    ),
+    path('latest_entries/', views.latest_entries, name="latest_entries"),
 
-    url(r'^top_entries/(?P<page>\d+)/$', views.top_entries, name="top_entries"),
-    url(r'^top_entries/$', views.top_entries, name="top_entries"),
+    path('top_entries/<int:page>/', views.top_entries, name="top_entries"),
+    path('top_entries/', views.top_entries, name="top_entries"),
 
-    url(r'^generate/', views.generate, name="generate"),
+    path('generate/', views.generate, name="generate"),
 
-    url(r'^(?P<char_id>\w{8})/vote', views.vote, name="vote"),
-    url(r'^(?P<char_id>\w{8})/$', views.view_page, name="view_page"),
-    url(r'^$', views.home, name="home"),
+    path('<str:char_id>/vote', views.vote, name="vote"),
+    path('<str:char_id>/', views.view_page, name="view_page"),
+    path('', views.home, name="home"),
 ]
