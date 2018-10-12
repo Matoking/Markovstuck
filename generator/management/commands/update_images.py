@@ -2,11 +2,9 @@ import os
 from urllib.error import HTTPError
 
 import wget
-from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
 from django_redis import get_redis_connection
 from generator import settings
-from generator.models import CharacterText, GeneralText
 
 
 class Command(BaseCommand):
