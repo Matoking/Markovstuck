@@ -109,13 +109,6 @@ def top_entries(request, page=1):
 def generate(request):
     page = Page()
 
-    # Generate title
-    title_text = cache.get("title_text")
-
-    if title_text is None:
-        title_text = TitleText.objects.all()[0]
-        cache.set("title_text", title_text)
-
     # Get image
     page.image = ComicImage.get_random_image()
 
@@ -128,8 +121,6 @@ def generate(request):
     json_request["characters"] = []
 
     if random.randint(1, 10) >= 5:
-        # Generate dialoglog
-
         # How many characters will there be in the conversation
         characters_in_conv = random.randint(1, 3)
         json_request["conversation_length"] = random.randint(1, 4)
