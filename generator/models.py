@@ -1,22 +1,14 @@
-from __future__ import unicode_literals
-
 from django.db import models
 from django.core.cache import cache
 from django.utils import timezone
 
-from markovify.text import NewlineText
-from markovify.chain import Chain
-
-from generator import settings
-from generator.utils import save_chain
-
 from django_redis import get_redis_connection
 
 import random
+import requests
 
-import datetime
-
-import pickle
+import json
+import string
 
 
 class Leaderboards(object):
@@ -94,11 +86,27 @@ class ComicImage(object):
         return image_file_no
 
 
+# Character names corresponding to Markov chains that exist for each character
+CHARACTER_NAMES = [
+    'SOLLUX', 'PAA', 'PTA', 'PAG', 'CCG', 'CCC', 'NEPETA', 'FGA', 'TEREZI',
+    'GT', 'GG', 'GC', 'GA', 'FAC', 'DIRK', 'ARADIABOT', 'ROSE', 'ARQUIUSPRITE',
+    'FAG', 'uu', 'EQUIUS', 'ARADIASPRITE', 'ROXY', 'AC', 'PCG3', 'MEENAH',
+    'JAKE', 'GAMZEE', 'PCA', 'PCG', 'CEB', 'JASPROSESPRITE^2', 'FCG2', 'PTC',
+    'VRISKA', 'KANAYA?', 'EB', 'KARKAT', 'FTC', 'UU', 'KANAYA',
+    'DAVEPETASPRITE^2', 'ARADIA', '?CG', 'JADE', 'DAVE', 'CTG', 'CTA',
+    'ARANEA', 'FCT', 'CGC', 'FCA', 'FCG', 'FGC', 'JOHN', 'TAVROS', 'CC',
+    'CA', 'CG', 'ROSESPRITE', 'CT', 'PCG8', 'PCG6', 'PCG7', 'PCG4', 'PCG5',
+    'PCG2', 'FEFERI', 'CALLIOPE', 'DAVESPRITE', '?TG', 'PCC', 'CAC', 'CAA',
+    'CAG', 'PGC', 'TT', 'TG', 'FAA', 'TC', 'TA', 'AA', 'AG', 'AT', 'ERIDAN',
+    'TAVROSPRITE', 'JANE'
+]
+
+
 class Page(models.Model):
     """
     A randomly generated page
     """
-    char_id = models.CharField(max_length=8, db_index=True)
+    char_id = models.CharField(max_length=8, db_index=True, unique=True)
 
     title = models.TextField()
 
@@ -122,139 +130,57 @@ class Page(models.Model):
     saved = models.BooleanField(default=False)
     score = models.IntegerField(default=0, db_index=True)
 
-
-class CharacterText(models.Model):
-    """
-    Character-dialog specific text
-    """
-    character_id = models.IntegerField(db_index=True)
-    character = models.CharField(max_length=64,
-                                 db_index=True)
-    text = models.TextField()
-    chain = models.TextField()
-
-    markov = None
-
-    def save(self, *args, **kwargs):
-        # Generate the chain here
-        super(CharacterText, self).save(*args, **kwargs)
-
-    def generate_chain_file(self):
-        """Generate a Markov chain file that can be loaded later"""
-        self.markov = NewlineText(self.text)
-
-        data = self.markov.chain.to_json()
-        save_chain(self.character, data)
-
-    def generate_sentence(self):
+    @staticmethod
+    def generate_page():
         """
-        DEPRECATED
-        Generate a sentence by loading Markov chain into memory
+        Generate a random page
         """
-        if self.markov is None:
-            result = cache.get("character_text_pickle:%s" % self.character)
+        page = Page()
 
-            if result is not None:
-                self.markov = pickle.loads(result)
-            else:
-                self.markov = NewlineText(self.text)
-                cache.set("character_text_pickle:%s" %
-                          self.character, pickle.dumps(self.markov))
+        # Get image
+        page.image = ComicImage.get_random_image()
 
-        # Try at most 10 times to generate a sentence
-        for i in range(0, 10):
-            title = self.markov.make_sentence()
+        json_request = {}
 
-            if title is not None:
-                return title
+        if random.randint(1, 10) >= 7:
+            # Generate pre dialog text
+            json_request["generate_pre_dialog"] = True
 
-        return None
+        json_request["characters"] = []
 
+        if random.randint(1, 10) >= 5:
+            # How many characters will there be in the conversation
+            characters_in_conv = random.randint(1, 3)
+            json_request["conversation_length"] = random.randint(1, 4)
 
-class TitleText(models.Model):
-    """
-    Page title text
-    """
-    text = models.TextField()
-    chain = models.TextField()
+            json_request["characters"] = random.sample(
+                CHARACTER_NAMES, characters_in_conv
+            )
 
-    markov = None
+        json_request["characters"] = json.dumps(json_request["characters"])
 
-    def save(self, *args, **kwargs):
-        # Generate the chain here
-        super(TitleText, self).save(*args, **kwargs)
+        if random.randint(1, 10) >= 6:
+            # Generate post dialog text
+            json_request["generate_post_dialog"] = True
 
+        response = requests.post("http://127.0.0.1:5666/", data=json_request)
+        response = json.loads(response.text)
 
-    def generate_chain_file(self):
-        """Generate a Markov chain file that can be loaded later"""
-        self.markov = NewlineText(self.text)
+        page.char_id = ''.join(random.SystemRandom().choice(
+            string.ascii_letters + string.digits) for _ in range(8)
+        )
 
-        data = self.markov.chain.to_json()
-        save_chain("title", data)
+        page.title = response["title"]
 
-    def generate_sentence(self):
-        """
-        DEPRECATED
-        Generate a sentence by loading Markov chain into memory
-        """
-        if self.markov is None:
-            result = cache.get("title_text_pickle")
+        if "dialoglog" in response:
+            page.dialoglog = json.dumps(response["dialoglog"])
 
-            if result is not None:
-                self.markov = pickle.loads(result)
-            else:
-                self.markov = NewlineText(self.text)
-                cache.set("title_text_pickle", pickle.dumps(self.markov))
+        if "pre_dialog_text" in response:
+            page.pre_dialog_text = response["pre_dialog_text"]
 
-        # Try at most 10 times to generate a sentence
-        for i in range(0, 10):
-            title = self.markov.make_sentence()
+        if "post_dialog_text" in response:
+            page.post_dialog_text = response["post_dialog_text"]
 
-            if title is not None:
-                return title
+        page.save()
 
-        return None
-
-
-class GeneralText(models.Model):
-    """
-    Text that doesn't fall under anything else
-    """
-    text = models.TextField()
-    chain = models.TextField()
-
-    markov = None
-
-    def save(self, *args, **kwargs):
-        # Generate the chain here
-        super(GeneralText, self).save(*args, **kwargs)
-
-    def generate_chain_file(self):
-        """Generate a Markov chain file that can be loaded later"""
-        self.markov = NewlineText(self.text)
-
-        data = self.markov.chain.to_json()
-        save_chain("general", data)
-
-    def generate_sentence(self):
-        """
-        DEPRECATED
-        Generate a sentence by loading Markov chain into memory
-        """
-        if self.markov is None:
-            result = cache.get("general_text_pickle")
-
-            if result is not None:
-                self.markov = pickle.loads(result)
-            else:
-                self.markov = NewlineText(self.text)
-                cache.set("general_text_pickle", pickle.dumps(self.markov))
-
-        # Try at most 10 times to generate a sentence
-        for i in range(0, 10):
-            title = self.markov.make_sentence()
-
-            if title is not None:
-                return title
-
-        return None
+        return page

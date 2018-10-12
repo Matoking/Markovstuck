@@ -1,23 +1,13 @@
-from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, redirect
-from django.core.cache import cache
-
-from generator.models import (
-    Leaderboards, ComicImage, Page, CharacterText, TitleText, GeneralText
-)
-
-from markovstuck.util import Paginator
-
-from django_redis import get_redis_connection
-
-from ipware.ip import get_real_ip
-
-import random
 import json
-import string
 import math
-import datetime
-import requests
+
+from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import redirect, render
+from django_redis import get_redis_connection
+from generator.models import Leaderboards, Page
+from ipware.ip import get_real_ip
+from markovstuck.util import Paginator
 
 
 def home(request):
@@ -107,70 +97,7 @@ def top_entries(request, page=1):
 
 
 def generate(request):
-    page = Page()
-
-    # Get image
-    page.image = ComicImage.get_random_image()
-
-    json_request = {}
-
-    if random.randint(1, 10) >= 7:
-        # Generate pre dialog text
-        json_request["generate_pre_dialog"] = True
-
-    json_request["characters"] = []
-
-    if random.randint(1, 10) >= 5:
-        # How many characters will there be in the conversation
-        characters_in_conv = random.randint(1, 3)
-        json_request["conversation_length"] = random.randint(1, 4)
-
-        character_count = CharacterText.objects.count()
-
-        for i in range(0, characters_in_conv):
-            random_char_id = random.randint(1, character_count)
-
-            character = cache.get("character:%d" % random_char_id)
-
-            if character is None:
-                character = CharacterText.objects.only(
-                    "character_id", "character").get(
-                    character_id=random_char_id)
-                cache.set("character:%d" % random_char_id, character)
-
-            json_request["characters"].append(character.character)
-
-    json_request["characters"] = json.dumps(json_request["characters"])
-
-    if random.randint(1, 10) >= 6:
-        # Generate post dialog text
-        json_request["generate_post_dialog"] = True
-
-    response = requests.post("http://127.0.0.1:5666/", data=json_request)
-    response = json.loads(response.text)
-
-    page.char_id = ''.join(random.SystemRandom().choice(
-        string.ascii_letters + string.digits) for _ in range(8)
-    )
-
-    page.title = response["title"]
-
-    if "dialoglog" in response:
-        page.dialoglog = json.dumps(response["dialoglog"])
-
-    if "pre_dialog_text" in response:
-        page.pre_dialog_text = response["pre_dialog_text"]
-
-    if "post_dialog_text" in response:
-        page.post_dialog_text = response["post_dialog_text"]
-
-    # This is really unlikely (unless there's a problem with generating random numbers),
-    # but check if the char ID already exists
-    if Page.objects.filter(char_id=page.char_id).count() > 0:
-        raise RuntimeError(
-            "A duplicate char ID was generated. Consider participating in a lottery instead.")
-
-    page.save()
+    page = Page.generate_page()
 
     return redirect("view_page", char_id=page.char_id)
 
